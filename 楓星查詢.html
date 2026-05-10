@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>楓星｜道具查詢</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap');
+
+:root {
+  --orange:      #F5A623;
+  --orange-dark: #E8941A;
+  --orange-light:#FFF3DC;
+  --orange-bg:   #FFF8EE;
+  --blue-tag:    #6C6FD4;
+  --blue-light:  #EEEEFF;
+  --pink-tag:    #EF6B8B;
+  --pink-light:  #FFEEF3;
+  --green-tag:   #3CB87A;
+  --green-light: #E8F9F1;
+  --gray-100:    #F7F7F7;
+  --gray-200:    #EEEEEE;
+  --gray-300:    #DDDDDD;
+  --gray-500:    #999999;
+  --gray-700:    #555555;
+  --gray-900:    #222222;
+  --white:       #FFFFFF;
+  --radius-sm:   6px;
+  --radius-md:   12px;
+  --radius-lg:   20px;
+  --radius-pill: 999px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Noto Sans TC', sans-serif;
+  background: var(--white);
+  color: var(--gray-900);
+  min-height: 100vh;
+}
+
+/* ── NAV ── */
+nav {
+  background: var(--white);
+  border-bottom: 1px solid var(--gray-200);
+  height: 56px;
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.06);
+}
+.nav-logo {
+  font-size: 20px;
+  font-weight: 900;
+  color: var(--orange);
+  letter-spacing: -0.5px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.nav-logo span { font-size: 22px; }
+.nav-title {
+  margin-left: 10px;
+  font-size: 14px;
+  color: var(--gray-500);
+  font-weight: 500;
+  padding-left: 10px;
+  border-left: 1px solid var(--gray-300);
+}
+
+/* ── HERO BAND ── */
+.hero {
+  background: linear-gradient(135deg, #FFF0CC 0%, #FFE5A0 50%, #FFD580 100%);
+  padding: 28px 24px;
+  text-align: center;
+  border-bottom: 2px solid #F5D080;
+}
+.hero-title {
+  font-size: 26px;
+  font-weight: 900;
+  color: #7A4800;
+  letter-spacing: 1px;
+  margin-bottom: 6px;
+}
+.hero-sub {
+  font-size: 13px;
+  color: #A06820;
+  font-weight: 500;
+}
+
+/* ── MAIN LAYOUT ── */
+.main {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 24px 16px 60px;
+}
+
+/* ── TABS ── */
+.tab-row {
+  display: flex;
+  gap: 0;
+  margin-bottom: 20px;
+  border-bottom: 2px solid var(--gray-200);
+}
+.tab-btn {
+  background: none;
+  border: none;
+  padding: 10px 22px;
+  font-family: 'Noto Sans TC', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--gray-500);
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -2px;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.tab-btn:hover { color: var(--orange); }
+.tab-btn.active { color: var(--orange); border-bottom-color: var(--orange); }
+
+.panel { display: none; }
+.panel.active { display: block; }
+
+/* ── SEARCH BOX ── */
+.search-card {
+  background: var(--orange-bg);
+  border: 1.5px solid #F5D080;
+  border-radius: var(--radius-md);
+  padding: 16px 18px;
+  margin-bottom: 18px;
+}
+.search-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--orange-dark);
+  margin-bottom: 8px;
+  letter-spacing: 0.5px;
+}
+.search-row { display: flex; gap: 8px; }
+.search-input {
+  flex: 1;
+  border: 1.5px solid var(--gray-300);
+  border-radius: var(--radius-pill);
+  padding: 9px 16px;
+  font-family: 'Noto Sans TC', sans-serif;
+  font-size: 14px;
+  outline: none;
+  background: var(--white);
+  transition: border-color 0.15s;
+  color: var(--gray-900);
+}
+.search-input::placeholder { color: var(--gray-500); }
+.search-input:focus { border-color: var(--orange); }
+.search-btn {
+  background: var(--orange);
+  color: var(--white);
+  border: none;
+  border-radius: var(--radius-pill);
+  padding: 9px 22px;
+  font-family: 'Noto Sans TC', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s;
+  white-space: nowrap;
+}
+.search-btn:hover { background: var(--orange-dark); }
+
+/* ── CHIP FILTERS ── */
+.chip-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; }
+.chip {
+  background: var(--gray-100);
+  border: 1.5px solid var(--gray-200);
+  border-radius: var(--radius-pill);
+  padding: 5px 14px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--gray-700);
+  cursor: pointer;
+  transition: all 0.12s;
+  font-family: 'Noto Sans TC', sans-serif;
+}
+.chip:hover  { border-color: var(--orange); color: var(--orange); background: var(--orange-light); }
+.chip.active { background: var(--orange); border-color: var(--orange); color: var(--white); font-weight: 700; }
+
+/* ── SECTION HEADER ── */
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.section-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--gray-900);
+}
+.section-count {
+  background: var(--orange-light);
+  color: var(--orange-dark);
+  border-radius: var(--radius-pill);
+  padding: 2px 10px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+/* ── REVERSE: drop result card ── */
+.drop-card {
+  background: var(--white);
+  border: 1.5px solid var(--gray-200);
+  border-radius: var(--radius-md);
+  margin-bottom: 10px;
+  overflow: hidden;
+  transition: box-shadow 0.15s;
+}
+.drop-card:hover { box-shadow: 0 2px 12px rgba(245,166,35,0.15); border-color: #F5D080; }
+
+.drop-card-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  background: var(--orange-bg);
+  border-bottom: 1px solid #F5D080;
+}
+.drop-icon {
+  width: 32px; height: 32px;
+  background: var(--orange-light);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+.drop-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--gray-900);
+}
+
+.source-list { padding: 4px 0; }
+.source-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 16px;
+  border-bottom: 1px solid var(--gray-100);
+  font-size: 13px;
+  transition: background 0.1s;
+}
+.source-row:last-child { border-bottom: none; }
+.source-row:hover { background: var(--gray-100); }
+
+.src-monster { font-weight: 700; color: var(--gray-900); min-width: 80px; }
+.src-lv {
+  background: var(--blue-light);
+  color: var(--blue-tag);
+  border-radius: var(--radius-pill);
+  padding: 2px 9px;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.src-arrow { color: var(--gray-300); font-size: 12px; }
+.src-map {
+  background: var(--orange);
+  color: var(--white);
+  border-radius: var(--radius-pill);
+  padding: 2px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.src-path { font-size: 11px; color: var(--gray-500); }
+
+/* ── BROWSE: accordion ── */
+.l1-block {
+  background: var(--white);
+  border: 1.5px solid var(--gray-200);
+  border-radius: var(--radius-md);
+  margin-bottom: 10px;
+  overflow: hidden;
+}
+.l1-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 13px 18px;
+  cursor: pointer;
+  user-select: none;
+  background: var(--white);
+  transition: background 0.12s;
+}
+.l1-header:hover { background: var(--orange-bg); }
+.l1-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--gray-900);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.l1-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: var(--orange);
+  flex-shrink: 0;
+}
+.acc-arrow {
+  font-size: 12px;
+  color: var(--gray-500);
+  transition: transform 0.2s;
+}
+.acc-arrow.open { transform: rotate(90deg); }
+
+.l1-body { display: none; border-top: 1px solid var(--gray-200); background: var(--gray-100); padding: 10px 12px; }
+.l1-body.open { display: block; }
+
+.l2-block {
+  background: var(--white);
+  border: 1.5px solid var(--gray-200);
+  border-radius: var(--radius-sm);
+  margin-bottom: 8px;
+  overflow: hidden;
+}
+.l2-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.12s;
+}
+.l2-header:hover { background: var(--orange-bg); }
+.l2-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--gray-700);
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.l2-badge {
+  background: var(--pink-light);
+  color: var(--pink-tag);
+  border-radius: var(--radius-pill);
+  padding: 1px 8px;
+  font-size: 11px;
+  font-weight: 700;
+}
+.l2-body { display: none; border-top: 1px solid var(--gray-200); background: #FAFAFA; padding: 8px 10px; }
+.l2-body.open { display: block; }
+
+.map-block {
+  background: var(--white);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-sm);
+  margin-bottom: 6px;
+  overflow: hidden;
+}
+.map-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.12s;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--gray-700);
+}
+.map-header:hover { background: var(--orange-bg); }
+.map-icon { font-size: 13px; margin-right: 5px; }
+.map-body { display: none; border-top: 1px solid var(--gray-200); padding: 10px 12px; background: #FFFDF9; }
+.map-body.open { display: block; }
+
+/* Monster row inside map */
+.monster-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px dashed var(--gray-200);
+}
+.monster-row:last-child { border-bottom: none; padding-bottom: 0; }
+.monster-avatar {
+  width: 34px; height: 34px;
+  background: var(--gray-100);
+  border-radius: 8px;
+  border: 1px solid var(--gray-200);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+.monster-info { flex: 1; }
+.monster-name-row {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 6px;
+}
+.monster-name { font-size: 13px; font-weight: 700; color: var(--gray-900); }
+.monster-lv {
+  background: var(--blue-light);
+  color: var(--blue-tag);
+  border-radius: var(--radius-pill);
+  padding: 1px 8px;
+  font-size: 11px;
+  font-weight: 700;
+}
+.drops-list { display: flex; flex-wrap: wrap; gap: 5px; }
+.drop-tag {
+  background: var(--gray-100);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-pill);
+  padding: 2px 10px;
+  font-size: 11px;
+  color: var(--gray-700);
+  font-weight: 500;
+}
+
+/* Empty / results meta */
+.results-meta { font-size: 13px; color: var(--gray-500); margin-bottom: 14px; }
+.result-hl { color: var(--orange-dark); font-weight: 700; }
+.empty-state {
+  text-align: center;
+  padding: 48px 20px;
+  color: var(--gray-500);
+  font-size: 14px;
+}
+.empty-icon { font-size: 40px; margin-bottom: 10px; }
+
+/* divider */
+.divider { border: none; border-top: 1px solid var(--gray-200); margin: 16px 0; }
+
+/* ── RANGE SLIDER ── */
+.slider-display {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  margin-bottom: 18px;
+}
+.slider-lv-label { font-size: 13px; color: var(--gray-500); font-weight: 500; }
+.slider-lv-num {
+  font-size: 22px;
+  font-weight: 900;
+  color: var(--orange-dark);
+  min-width: 36px;
+  text-align: center;
+}
+.slider-lv-sep { font-size: 18px; color: var(--gray-300); margin: 0 6px; }
+
+.slider-wrap {
+  position: relative;
+  height: 36px;
+  margin: 0 8px;
+}
+.slider-track {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  left: 0; right: 0;
+  height: 6px;
+  background: var(--gray-200);
+  border-radius: 3px;
+}
+.slider-range {
+  position: absolute;
+  height: 100%;
+  background: var(--orange);
+  border-radius: 3px;
+}
+.range-input {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0; left: 0;
+  appearance: none;
+  -webkit-appearance: none;
+  background: transparent;
+  pointer-events: none;
+  outline: none;
+}
+.range-input::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  background: var(--white);
+  border: 3px solid var(--orange);
+  cursor: pointer;
+  pointer-events: all;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  transition: border-color 0.15s, transform 0.15s;
+}
+.range-input::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+  border-color: var(--orange-dark);
+}
+.range-input::-moz-range-thumb {
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  background: var(--white);
+  border: 3px solid var(--orange);
+  cursor: pointer;
+  pointer-events: all;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+.slider-ends {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--gray-500);
+  margin: 4px 8px 0;
+}
+
+@media (max-width: 500px) {
+  .hero-title { font-size: 20px; }
+  .tab-btn { padding: 10px 14px; font-size: 13px; }
+  .main { padding: 16px 12px 48px; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo"><span>🍁</span> 楓星</div>
+  <div class="nav-title">道具查詢</div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-title">道具掉落查詢</div>
+  <div class="hero-sub">輸入道具名稱反查怪物來源，依地區瀏覽，或依等級區間查詢怪物</div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <div class="tab-row">
+    <button class="tab-btn active" id="tab-reverse">🔍 反查（道具 → 怪物）</button>
+    <button class="tab-btn" id="tab-browse">📋 正查（地區瀏覽）</button>
+    <button class="tab-btn" id="tab-level">⚔️ 等級查詢</button>
+  </div>
+
+  <!-- 反查 -->
+  <div id="panel-reverse" class="panel active">
+    <div class="search-card">
+      <div class="search-label">輸入道具名稱，查詢掉落來源</div>
+      <div class="search-row">
+        <input class="search-input" id="rev-input" type="text" placeholder="例如：卷軸、披風、藥水…">
+        <button class="search-btn" id="rev-btn">查詢</button>
+      </div>
+    </div>
+    <div class="chip-row" id="rev-chips"></div>
+    <hr class="divider">
+    <div id="rev-results">
+      <div class="empty-state"><div class="empty-icon">🗺️</div>輸入道具名稱開始搜尋</div>
+    </div>
+  </div>
+
+  <!-- 正查 -->
+  <div id="panel-browse" class="panel">
+    <div class="chip-row" id="browse-chips"></div>
+    <hr class="divider">
+    <div id="browse-results"></div>
+  </div>
+
+  <!-- 等級查詢 -->
+  <div id="panel-level" class="panel">
+    <div class="search-card">
+      <div class="search-label">拖動滑桿設定怪物等級區間</div>
+      <div class="slider-display">
+        <span class="slider-lv-label">Lv.</span>
+        <span id="lv-min-val" class="slider-lv-num">1</span>
+        <span class="slider-lv-sep">～</span>
+        <span class="slider-lv-label">Lv.</span>
+        <span id="lv-max-val" class="slider-lv-num">200</span>
+      </div>
+      <div class="slider-wrap">
+        <div class="slider-track">
+          <div class="slider-range" id="slider-range"></div>
+        </div>
+        <input type="range" id="lv-min" class="range-input" min="1" max="200" value="1">
+        <input type="range" id="lv-max" class="range-input" min="1" max="200" value="200">
+      </div>
+      <div class="slider-ends">
+        <span>Lv.1</span>
+        <span>Lv.200</span>
+      </div>
+      <div style="text-align:center;margin-top:14px;">
+        <button class="search-btn" id="lv-btn">查詢</button>
+      </div>
+    </div>
+    <hr class="divider">
+    <div id="level-results">
+      <div class="empty-state"><div class="empty-icon">⚔️</div>設定等級區間後按查詢</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// =============================================
+// 怪物資料庫 — 每隻怪物只填一次
+// =============================================
+const MONSTERS = {
+  "武士鬼":   { name: "武士鬼",   level: 60, drops: ["武士刀", "忍者手裡劍", "中級體力藥水", "楓幣袋", "舊卷軸"] },
+  "火焰武士": { name: "火焰武士", level: 65, drops: ["火焰符文", "紅色鎧甲", "高級體力藥水", "武士頭盔"] },
+  "楓葉精靈": { name: "楓葉精靈", level: 55, drops: ["楓葉碎片", "精靈粉末", "中級魔力藥水", "綠色戒指"] },
+  "菇菇武士": { name: "菇菇武士", level: 58, drops: ["菇菇帽", "神社御守", "楓幣袋", "初級體力藥水"] },
+  "昭和村民": { name: "昭和村民", level: 45, drops: ["村民頭巾", "農具", "楓幣袋", "初級魔力藥水"] },
+  "都市怪客": { name: "都市怪客", level: 75, drops: ["都市地圖", "現代裝備", "高級魔力藥水", "金屬碎片"] },
+  "耳罩蜥蜴": { name: "耳罩蜥蜴", level: 72, drops: ["弓攻擊卷軸60%", "藍色披風", "皮革帽", "長劍", "楓幣袋"] },
+  "狐蒙":     { name: "狐蒙",     level: 76, drops: ["法杖", "紅色鞋子", "中級魔力藥水", "沙漠之石"] },
+  "黃金蠍子": { name: "黃金蠍子", level: 80, drops: ["黃金蠍子毒液", "鎧甲碎片", "高級體力藥水", "戒指"] },
+  "小史萊姆": { name: "小史萊姆", level: 1,  drops: ["楓幣袋", "初級體力藥水", "綠色蘑菇帽", "短劍"] },
+  "橘色蘑菇": { name: "橘色蘑菇", level: 15, drops: ["橘色蘑菇帽", "初級魔力藥水", "楓幣袋", "木製短杖"] },
+  "豬豬":     { name: "豬豬",     level: 20, drops: ["豬皮手套", "楓幣袋", "初級體力藥水", "短靴"] },
+};
+
+// =============================================
+// 地圖資料
+// 兩層：{ area, maps:[{map, monsters:[id,...]}] }
+// 三層：{ area, subareas:[{subarea, maps:[...]}] }
+// =============================================
+const MAP_DATA = [
+  {
+    area: "日本國",
+    subareas: [
+      {
+        subarea: "菇菇神社",
+        maps: [
+          { map: "本能寺",   monsters: ["武士鬼", "火焰武士"] },
+          { map: "楓葉丘陵", monsters: ["楓葉精靈", "武士鬼"] },
+          { map: "菇菇神社", monsters: ["菇菇武士", "楓葉精靈"] }
+        ]
+      },
+      {
+        subarea: "大和區",
+        maps: [
+          { map: "昭和村", monsters: ["昭和村民"] },
+          { map: "東京",   monsters: ["都市怪客", "昭和村民"] }
+        ]
+      }
+    ]
+  },
+  {
+    area: "納希沙漠",
+    maps: [
+      { map: "納希綠洲城", monsters: ["耳罩蜥蜴", "狐蒙"] },
+      { map: "瑪迦提亞城", monsters: ["黃金蠍子", "耳罩蜥蜴"] }
+    ]
+  },
+  {
+    area: "楓之島",
+    maps: [
+      { map: "新手村", monsters: ["小史萊姆", "橘色蘑菇"] },
+      { map: "林地",   monsters: ["豬豬", "小史萊姆"] }
+    ]
+  }
+];
+// =============================================
+
+let revRegion    = '全部';
+let browseRegion = '全部';
+const openL1  = new Set();
+const openL2  = new Set();
+const openMap = new Set();
+
+function getAreas() { return ['全部', ...MAP_DATA.map(d => d.area)]; }
+
+function switchTab(name) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('panel-' + name).classList.add('active');
+  document.getElementById('tab-'   + name).classList.add('active');
+}
+
+function buildChips(id, items, active, cb) {
+  const el = document.getElementById(id);
+  el.innerHTML = '';
+  items.forEach(item => {
+    const b = document.createElement('button');
+    b.className = 'chip' + (item === active ? ' active' : '');
+    b.textContent = item;
+    b.onclick = () => cb(item);
+    el.appendChild(b);
+  });
+}
+
+function flattenArea(areaObj) {
+  const result = [];
+  if (areaObj.subareas) {
+    areaObj.subareas.forEach(sub =>
+      sub.maps.forEach(m => result.push({ map: m.map, monsterIds: m.monsters, area: areaObj.area, subarea: sub.subarea }))
+    );
+  } else {
+    areaObj.maps.forEach(m => result.push({ map: m.map, monsterIds: m.monsters, area: areaObj.area, subarea: null }));
+  }
+  return result;
+}
+
+// ── 反查 ──
+function doReverse() {
+  const q  = document.getElementById('rev-input').value.trim();
+  const el = document.getElementById('rev-results');
+  if (!q) { el.innerHTML = '<div class="empty-state"><div class="empty-icon">🗺️</div>輸入道具名稱開始搜尋</div>'; return; }
+
+  const found = [];
+  MAP_DATA.forEach(areaObj => {
+    if (revRegion !== '全部' && areaObj.area !== revRegion) return;
+    flattenArea(areaObj).forEach(entry => {
+      entry.monsterIds.forEach(mid => {
+        const mon = MONSTERS[mid];
+        if (!mon) return;
+        mon.drops.forEach(drop => {
+          if (!drop.includes(q)) return;
+          let f = found.find(x => x.itemName === drop);
+          if (!f) { f = { itemName: drop, sources: [] }; found.push(f); }
+          f.sources.push({ monster: mon.name, level: mon.level, map: entry.map, subarea: entry.subarea, area: entry.area });
+        });
+      });
+    });
+  });
+
+  if (!found.length) { el.innerHTML = `<div class="empty-state"><div class="empty-icon">😢</div>找不到「${q}」的掉落來源</div>`; return; }
+
+  const total = found.reduce((a, f) => a + f.sources.length, 0);
+  let html = `<div class="results-meta">找到 <span class="result-hl">${found.length}</span> 種道具，共 <span class="result-hl">${total}</span> 筆來源</div>`;
+
+  found.forEach(item => {
+    html += `<div class="drop-card">
+      <div class="drop-card-head">
+        <div class="drop-icon">📦</div>
+        <div class="drop-name">${item.itemName}</div>
+      </div>
+      <div class="source-list">`;
+    item.sources.forEach(src => {
+      const path = src.subarea ? `${src.area} · ${src.subarea}` : src.area;
+      html += `<div class="source-row">
+        <span class="src-monster">${src.monster}</span>
+        <span class="src-lv">Lv.${src.level}</span>
+        <span class="src-arrow">›</span>
+        <span class="src-map">${src.map}</span>
+        <span class="src-path">${path}</span>
+      </div>`;
+    });
+    html += `</div></div>`;
+  });
+
+  el.innerHTML = html;
+}
+
+// ── 正查 ──
+function renderMaps(maps, prefix) {
+  return maps.map((mapObj, mi) => {
+    const mid    = `${prefix}-m${mi}`;
+    const isOpen = openMap.has(mid);
+    const count  = mapObj.monsters.length;
+    const monHtml = mapObj.monsters.map(mId => {
+      const mon = MONSTERS[mId];
+      if (!mon) return '';
+      return `<div class="monster-row">
+        <div class="monster-avatar">👾</div>
+        <div class="monster-info">
+          <div class="monster-name-row">
+            <span class="monster-name">${mon.name}</span>
+            <span class="monster-lv">Lv.${mon.level}</span>
+          </div>
+          <div class="drops-list">${mon.drops.map(d => `<span class="drop-tag">${d}</span>`).join('')}</div>
+        </div>
+      </div>`;
+    }).join('');
+    return `<div class="map-block">
+      <div class="map-header" onclick="toggle(openMap,'${mid}')">
+        <span><span class="map-icon">📍</span>${mapObj.map}<span style="color:var(--gray-500);font-size:12px;margin-left:6px;">${count} 隻怪物</span></span>
+        <span class="acc-arrow ${isOpen?'open':''}">›</span>
+      </div>
+      <div class="map-body ${isOpen?'open':''}" id="${mid}">${monHtml}</div>
+    </div>`;
+  }).join('');
+}
+
+function doBrowse() {
+  const data = browseRegion === '全部' ? MAP_DATA : MAP_DATA.filter(d => d.area === browseRegion);
+  const el   = document.getElementById('browse-results');
+  if (!data.length) { el.innerHTML = '<div class="empty-state"><div class="empty-icon">🗺️</div>此區域尚無資料</div>'; return; }
+
+  let html = '';
+  data.forEach((areaObj, ai) => {
+    const l1id   = `l1-${ai}`;
+    const l1open = openL1.has(l1id);
+
+    // count total maps
+    const totalMaps = areaObj.subareas
+      ? areaObj.subareas.reduce((a, s) => a + s.maps.length, 0)
+      : areaObj.maps.length;
+
+    let inner = '';
+    if (areaObj.subareas) {
+      inner = areaObj.subareas.map((sub, si) => {
+        const l2id   = `l2-${ai}-${si}`;
+        const l2open = openL2.has(l2id);
+        return `<div class="l2-block">
+          <div class="l2-header" onclick="toggle(openL2,'${l2id}')">
+            <span class="l2-title">📍 ${sub.subarea} <span class="l2-badge">${sub.maps.length} 張地圖</span></span>
+            <span class="acc-arrow ${l2open?'open':''}">›</span>
+          </div>
+          <div class="l2-body ${l2open?'open':''}" id="${l2id}">
+            ${renderMaps(sub.maps, `${ai}-${si}`)}
+          </div>
+        </div>`;
+      }).join('');
+    } else {
+      inner = renderMaps(areaObj.maps, `${ai}`);
+    }
+
+    html += `<div class="l1-block">
+      <div class="l1-header" onclick="toggle(openL1,'${l1id}')">
+        <span class="l1-title"><span class="l1-dot"></span>${areaObj.area}<span style="color:var(--gray-500);font-size:12px;font-weight:500;margin-left:6px;">${totalMaps} 張地圖</span></span>
+        <span class="acc-arrow ${l1open?'open':''}">›</span>
+      </div>
+      <div class="l1-body ${l1open?'open':''}" id="${l1id}">${inner}</div>
+    </div>`;
+  });
+  el.innerHTML = html;
+}
+
+function doLevelSearch() {
+  const lo = parseInt(sliderMin.value);
+  const hi = parseInt(sliderMax.value);
+  const el = document.getElementById('level-results');
+
+  // 先建立 怪物ID → 出現地圖列表 的對照表
+  const monsterMaps = {}; // { monsterId: [{map, subarea, area}] }
+  MAP_DATA.forEach(areaObj => {
+    flattenArea(areaObj).forEach(entry => {
+      entry.monsterIds.forEach(mid => {
+        if (!monsterMaps[mid]) monsterMaps[mid] = [];
+        monsterMaps[mid].push({ map: entry.map, subarea: entry.subarea, area: entry.area });
+      });
+    });
+  });
+
+  // 篩選符合等級的怪物
+  const results = Object.entries(MONSTERS)
+    .filter(([, mon]) => mon.level >= lo && mon.level <= hi)
+    .sort(([, a], [, b]) => a.level - b.level);
+
+  if (!results.length) {
+    el.innerHTML = `<div class="empty-state"><div class="empty-icon">😢</div>等級 ${lo}～${hi} 範圍內找不到怪物</div>`;
+    return;
+  }
+
+  let html = `<div class="results-meta">等級 <span class="result-hl">${lo}～${hi}</span>，共找到 <span class="result-hl">${results.length}</span> 隻怪物</div>`;
+
+  results.forEach(([mid, mon]) => {
+    const maps = monsterMaps[mid] || [];
+    html += `<div class="drop-card">
+      <div class="drop-card-head">
+        <div class="drop-icon">👾</div>
+        <div>
+          <div class="drop-name">${mon.name}</div>
+          <span class="monster-lv" style="display:inline-block;margin-top:3px;">Lv.${mon.level}</span>
+        </div>
+      </div>
+      <div class="source-list">`;
+
+    if (!maps.length) {
+      html += `<div class="source-row" style="color:var(--gray-500);">（尚無地圖資料）</div>`;
+    } else {
+      maps.forEach(loc => {
+        const path = loc.subarea ? `${loc.area} · ${loc.subarea}` : loc.area;
+        html += `<div class="source-row">
+          <span class="src-arrow">📍</span>
+          <span class="src-map">${loc.map}</span>
+          <span class="src-path">${path}</span>
+        </div>`;
+      });
+    }
+    html += `</div></div>`;
+  });
+
+  el.innerHTML = html;
+}
+
+
+function toggle(set, id) {
+  if (set.has(id)) set.delete(id); else set.add(id);
+  doBrowse();
+}
+
+const areas = getAreas();
+function rebuildRevChips(r)    { revRegion = r;    buildChips('rev-chips',    areas, r, rebuildRevChips);    doReverse(); }
+function rebuildBrowseChips(r) { browseRegion = r; openL1.clear(); openL2.clear(); openMap.clear(); buildChips('browse-chips', areas, r, rebuildBrowseChips); doBrowse(); }
+
+buildChips('rev-chips',    areas, revRegion,    rebuildRevChips);
+buildChips('browse-chips', areas, browseRegion, rebuildBrowseChips);
+doBrowse();
+
+// 掛載所有事件（避免 inline onclick 的問題）
+document.getElementById('tab-reverse').addEventListener('click', () => switchTab('reverse'));
+document.getElementById('tab-browse').addEventListener('click',  () => switchTab('browse'));
+document.getElementById('tab-level').addEventListener('click',   () => switchTab('level'));
+document.getElementById('rev-input').addEventListener('input',   () => doReverse());
+document.getElementById('rev-btn').addEventListener('click',     () => doReverse());
+document.getElementById('lv-btn').addEventListener('click',      () => doLevelSearch());
+
+// ── 雙把手滑桿邏輯 ──
+const sliderMin   = document.getElementById('lv-min');
+const sliderMax   = document.getElementById('lv-max');
+const minVal      = document.getElementById('lv-min-val');
+const maxVal      = document.getElementById('lv-max-val');
+const rangeBar    = document.getElementById('slider-range');
+const SLIDER_MAX  = 200;
+
+function updateSlider() {
+  let lo = parseInt(sliderMin.value);
+  let hi = parseInt(sliderMax.value);
+
+  // 兩個把手不能交叉
+  if (lo > hi) {
+    if (this === sliderMin) { lo = hi; sliderMin.value = lo; }
+    else                    { hi = lo; sliderMax.value = hi; }
+  }
+
+  minVal.textContent = lo;
+  maxVal.textContent = hi;
+
+  const pctLo = ((lo - 1) / (SLIDER_MAX - 1)) * 100;
+  const pctHi = ((hi - 1) / (SLIDER_MAX - 1)) * 100;
+  rangeBar.style.left  = pctLo + '%';
+  rangeBar.style.width = (pctHi - pctLo) + '%';
+}
+
+sliderMin.addEventListener('input', updateSlider);
+sliderMax.addEventListener('input', updateSlider);
+updateSlider.call(sliderMin); // 初始化
+
+</script>
+</body>
+</html>

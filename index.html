@@ -146,9 +146,10 @@ nav {
   margin-bottom: 8px;
   letter-spacing: 0.5px;
 }
-.search-row { display: flex; gap: 8px; }
+.search-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
 .search-input {
   flex: 1;
+  min-width: 0;
   border: 1.5px solid var(--gray-300);
   border-radius: var(--radius-pill);
   padding: 9px 16px;
@@ -953,5 +954,8 @@ sliderMax.addEventListener('input', updateSlider);
 updateSlider.call(sliderMin); // 初始化
 
 </script>
+
+<div style="text-align:center;padding:16px;font-size:11px;color:#bbb;">v1.0.0</div>
+
 </body>
 </html>

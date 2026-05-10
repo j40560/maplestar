@@ -116,6 +116,9 @@ nav {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
 }
 .tab-row::-webkit-scrollbar { display: none; }
 .tab-btn {
@@ -561,8 +564,8 @@ nav {
 <div class="main">
 
   <div class="tab-row">
-    <button class="tab-btn active" id="tab-reverse">🔍 反查（道具 → 怪物）</button>
-    <button class="tab-btn" id="tab-browse">📋 正查（地區瀏覽）</button>
+    <button class="tab-btn active" id="tab-reverse">🔍 道具查詢</button>
+    <button class="tab-btn" id="tab-browse">📋 地圖查詢</button>
     <button class="tab-btn" id="tab-level">⚔️ 等級查詢</button>
   </div>
 

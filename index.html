@@ -643,8 +643,23 @@ async function loadData() {
       fetch('monsters.json'),
       fetch('maps.json')
     ]);
-    MONSTERS = await mRes.json();
-    MAP_DATA = await dRes.json();
+    const mJson = await mRes.json();
+    const dJson = await dRes.json();
+
+    // 取出版本號
+    const monsterVer = mJson._version || '-';
+    const mapVer     = dJson._version || '-';
+
+    // 過濾掉 _version，只留怪物資料
+    MONSTERS = Object.fromEntries(
+      Object.entries(mJson).filter(([k]) => !k.startsWith('_'))
+    );
+    MAP_DATA = dJson.data;
+
+    // 更新頁尾版本號
+    document.getElementById('ver-monsters').textContent = monsterVer;
+    document.getElementById('ver-maps').textContent     = mapVer;
+
     init();
   } catch (e) {
     document.body.innerHTML += '<div style="text-align:center;padding:40px;color:red;">資料載入失敗，請確認 monsters.json 和 maps.json 是否存在</div>';
@@ -929,7 +944,9 @@ loadData();
 
 </script>
 
-<div style="text-align:center;padding:16px;font-size:11px;color:#bbb;">v1.0.2</div>
+<div style="text-align:center;padding:16px;font-size:11px;color:#bbb;line-height:2;">
+  網頁 v1.0.3 ｜ 怪物資料 v<span id="ver-monsters">-</span> ｜ 地圖資料 v<span id="ver-maps">-</span>
+</div>
 
 </body>
 </html>

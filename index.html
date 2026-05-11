@@ -627,72 +627,29 @@ nav {
 </div>
 
 <script>
-// =============================================
-// 怪物資料庫 — 每隻怪物只填一次
-// =============================================
-const MONSTERS = {
-  "武士鬼":   { name: "武士鬼",   level: 60, drops: ["武士刀", "忍者手裡劍", "中級體力藥水", "楓幣袋", "舊卷軸"] },
-  "火焰武士": { name: "火焰武士", level: 65, drops: ["火焰符文", "紅色鎧甲", "高級體力藥水", "武士頭盔"] },
-  "楓葉精靈": { name: "楓葉精靈", level: 55, drops: ["楓葉碎片", "精靈粉末", "中級魔力藥水", "綠色戒指"] },
-  "菇菇武士": { name: "菇菇武士", level: 58, drops: ["菇菇帽", "神社御守", "楓幣袋", "初級體力藥水"] },
-  "昭和村民": { name: "昭和村民", level: 45, drops: ["村民頭巾", "農具", "楓幣袋", "初級魔力藥水"] },
-  "都市怪客": { name: "都市怪客", level: 75, drops: ["都市地圖", "現代裝備", "高級魔力藥水", "金屬碎片"] },
-  "耳罩蜥蜴": { name: "耳罩蜥蜴", level: 72, drops: ["弓攻擊卷軸60%", "藍色披風", "皮革帽", "長劍", "楓幣袋"] },
-  "狐蒙":     { name: "狐蒙",     level: 76, drops: ["法杖", "紅色鞋子", "中級魔力藥水", "沙漠之石"] },
-  "黃金蠍子": { name: "黃金蠍子", level: 80, drops: ["黃金蠍子毒液", "鎧甲碎片", "高級體力藥水", "戒指"] },
-  "小史萊姆": { name: "小史萊姆", level: 1,  drops: ["楓幣袋", "初級體力藥水", "綠色蘑菇帽", "短劍"] },
-  "橘色蘑菇": { name: "橘色蘑菇", level: 15, drops: ["橘色蘑菇帽", "初級魔力藥水", "楓幣袋", "木製短杖"] },
-  "豬豬":     { name: "豬豬",     level: 20, drops: ["豬皮手套", "楓幣袋", "初級體力藥水", "短靴"] },
-};
-
-// =============================================
-// 地圖資料
-// 兩層：{ area, maps:[{map, monsters:[id,...]}] }
-// 三層：{ area, subareas:[{subarea, maps:[...]}] }
-// =============================================
-const MAP_DATA = [
-  {
-    area: "日本國",
-    subareas: [
-      {
-        subarea: "菇菇神社",
-        maps: [
-          { map: "本能寺",   monsters: ["武士鬼", "火焰武士"] },
-          { map: "楓葉丘陵", monsters: ["楓葉精靈", "武士鬼"] },
-          { map: "菇菇神社", monsters: ["菇菇武士", "楓葉精靈"] }
-        ]
-      },
-      {
-        subarea: "大和區",
-        maps: [
-          { map: "昭和村", monsters: ["昭和村民"] },
-          { map: "東京",   monsters: ["都市怪客", "昭和村民"] }
-        ]
-      }
-    ]
-  },
-  {
-    area: "納希沙漠",
-    maps: [
-      { map: "納希綠洲城", monsters: ["耳罩蜥蜴", "狐蒙"] },
-      { map: "瑪迦提亞城", monsters: ["黃金蠍子", "耳罩蜥蜴"] }
-    ]
-  },
-  {
-    area: "楓之島",
-    maps: [
-      { map: "新手村", monsters: ["小史萊姆", "橘色蘑菇"] },
-      { map: "林地",   monsters: ["豬豬", "小史萊姆"] }
-    ]
-  }
-];
-// =============================================
+let MONSTERS = {};
+let MAP_DATA = [];
 
 let revRegion    = '全部';
 let browseRegion = '全部';
 const openL1  = new Set();
 const openL2  = new Set();
 const openMap = new Set();
+
+// 載入資料
+async function loadData() {
+  try {
+    const [mRes, dRes] = await Promise.all([
+      fetch('monsters.json'),
+      fetch('maps.json')
+    ]);
+    MONSTERS = await mRes.json();
+    MAP_DATA = await dRes.json();
+    init();
+  } catch (e) {
+    document.body.innerHTML += '<div style="text-align:center;padding:40px;color:red;">資料載入失敗，請確認 monsters.json 和 maps.json 是否存在</div>';
+  }
+}
 
 function getAreas() { return ['全部', ...MAP_DATA.map(d => d.area)]; }
 
@@ -925,48 +882,54 @@ buildChips('rev-chips',    areas, revRegion,    rebuildRevChips);
 buildChips('browse-chips', areas, browseRegion, rebuildBrowseChips);
 doBrowse();
 
-// 掛載所有事件（避免 inline onclick 的問題）
-document.getElementById('tab-reverse').addEventListener('click', () => switchTab('reverse'));
-document.getElementById('tab-browse').addEventListener('click',  () => switchTab('browse'));
-document.getElementById('tab-level').addEventListener('click',   () => switchTab('level'));
-document.getElementById('rev-input').addEventListener('input',   () => doReverse());
-document.getElementById('rev-btn').addEventListener('click',     () => doReverse());
-document.getElementById('lv-btn').addEventListener('click',      () => doLevelSearch());
+function init() {
+  const areas = getAreas();
+  function rebuildRevChips(r)    { revRegion = r;    buildChips('rev-chips',    areas, r, rebuildRevChips);    doReverse(); }
+  function rebuildBrowseChips(r) { browseRegion = r; openL1.clear(); openL2.clear(); openMap.clear(); buildChips('browse-chips', areas, r, rebuildBrowseChips); doBrowse(); }
 
-// ── 雙把手滑桿邏輯 ──
-const sliderMin   = document.getElementById('lv-min');
-const sliderMax   = document.getElementById('lv-max');
-const minVal      = document.getElementById('lv-min-val');
-const maxVal      = document.getElementById('lv-max-val');
-const rangeBar    = document.getElementById('slider-range');
-const SLIDER_MAX  = 200;
+  buildChips('rev-chips',    areas, revRegion,    rebuildRevChips);
+  buildChips('browse-chips', areas, browseRegion, rebuildBrowseChips);
+  doBrowse();
 
-function updateSlider() {
-  let lo = parseInt(sliderMin.value);
-  let hi = parseInt(sliderMax.value);
+  document.getElementById('tab-reverse').addEventListener('click', () => switchTab('reverse'));
+  document.getElementById('tab-browse').addEventListener('click',  () => switchTab('browse'));
+  document.getElementById('tab-level').addEventListener('click',   () => switchTab('level'));
+  document.getElementById('rev-input').addEventListener('input',   () => doReverse());
+  document.getElementById('rev-btn').addEventListener('click',     () => doReverse());
+  document.getElementById('lv-btn').addEventListener('click',      () => doLevelSearch());
 
-  // 兩個把手不能交叉
-  if (lo > hi) {
-    if (this === sliderMin) { lo = hi; sliderMin.value = lo; }
-    else                    { hi = lo; sliderMax.value = hi; }
+  const sliderMin  = document.getElementById('lv-min');
+  const sliderMax  = document.getElementById('lv-max');
+  const minVal     = document.getElementById('lv-min-val');
+  const maxVal     = document.getElementById('lv-max-val');
+  const rangeBar   = document.getElementById('slider-range');
+  const SLIDER_MAX = 200;
+
+  function updateSlider() {
+    let lo = parseInt(sliderMin.value);
+    let hi = parseInt(sliderMax.value);
+    if (lo > hi) {
+      if (this === sliderMin) { lo = hi; sliderMin.value = lo; }
+      else                    { hi = lo; sliderMax.value = hi; }
+    }
+    minVal.textContent = lo;
+    maxVal.textContent = hi;
+    const pctLo = ((lo - 1) / (SLIDER_MAX - 1)) * 100;
+    const pctHi = ((hi - 1) / (SLIDER_MAX - 1)) * 100;
+    rangeBar.style.left  = pctLo + '%';
+    rangeBar.style.width = (pctHi - pctLo) + '%';
   }
 
-  minVal.textContent = lo;
-  maxVal.textContent = hi;
-
-  const pctLo = ((lo - 1) / (SLIDER_MAX - 1)) * 100;
-  const pctHi = ((hi - 1) / (SLIDER_MAX - 1)) * 100;
-  rangeBar.style.left  = pctLo + '%';
-  rangeBar.style.width = (pctHi - pctLo) + '%';
+  sliderMin.addEventListener('input', updateSlider);
+  sliderMax.addEventListener('input', updateSlider);
+  updateSlider.call(sliderMin);
 }
 
-sliderMin.addEventListener('input', updateSlider);
-sliderMax.addEventListener('input', updateSlider);
-updateSlider.call(sliderMin); // 初始化
+loadData();
 
 </script>
 
-<div style="text-align:center;padding:16px;font-size:11px;color:#bbb;">v1.0.1</div>
+<div style="text-align:center;padding:16px;font-size:11px;color:#bbb;">v1.0.2</div>
 
 </body>
 </html>
